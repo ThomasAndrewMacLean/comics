@@ -22,9 +22,12 @@
     "dependencies": {
         "apollo-server": "^2.1.0",
         "graphql": "^14.0.2",
-        "lodash": "^4.17.11"
+        "lodash": "^4.17.11",
+        "monk": "^6.0.6"
     },
     "devDependencies": {
+        "dotenv": "^6.0.0",
+        "eslint-config-prettier": "^3.1.0",
         "prettier-eslint": "^8.8.2"
     }
 }

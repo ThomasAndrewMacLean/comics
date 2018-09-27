@@ -1,0 +1,5 @@
+https://launchpad.graphql.com/1jzxrj179
+
+https://medium.com/the-ideal-system/graphql-and-mongodb-a-quick-example-34643e637e49
+
+https://hackernoon.com/easy-peasy-graphql-authentication-and-authorization-using-schema-directives-f28f1845da20
