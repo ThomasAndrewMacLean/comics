@@ -54,7 +54,7 @@ module.exports.seriesResolvers = {
             return com;
         },
         comics: async (root, args) => {
-            let x = await db.get(args.dbName).find({});
+            let x = await db.get(args.dbName).find({ nr: { $ne: null } });
             x.forEach(com => (com._id = com._id.toString()));
 
             return x;
