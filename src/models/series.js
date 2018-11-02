@@ -4,12 +4,7 @@ const db = require('monk')(
         process.env.DBPW
     }@ds046027.mlab.com:46027/commics`
 );
-
-const mockSeries = [
-    { id: 1, title: 'Rode Ridder', dbName: 'roderidder' },
-    { id: 2, title: 'Suske & Wiske', dbName: 'suskeenwiske' }
-];
-
+const user = 'thomas.maclean@gmail.com';
 module.exports.seriesDefs = gql`
     extend type Query {
         serie(id: Int!): Serie! @requireAuth
@@ -33,17 +28,19 @@ module.exports.seriesDefs = gql`
         _id: String!
         title: String!
         nr: Int!
+        owned: Boolean
+    }
+    extend type Mutation {
+        toggleOwned(serie: String!, comicid: String!, owned: Boolean!): Boolean
     }
 `;
 
 module.exports.seriesResolvers = {
     Query: {
-        serie: (root, args, ctx, info) => {
-            console.log(info);
-            console.log('***');
+        serie: async (root, args, ctx) => {
             console.log(ctx.req.user);
-
-            const serie = mockSeries.find(s => s.id == args.id);
+            let series = await db.get('series').find({});
+            const serie = series.find(s => s.id == args.id);
             return serie;
             //db.get(serie.dbName).find({}).then(s => s.json());
         },
@@ -54,20 +51,57 @@ module.exports.seriesResolvers = {
             return com;
         },
         comics: async (root, args) => {
-            let x = await db.get(args.dbName).find({ nr: { $ne: null } });
-            x.forEach(com => (com._id = com._id.toString()));
+            let comicsInSerie = await db
+                .get(args.dbName)
+                .find({ nr: { $ne: null } });
+            let userData = await db
+                .get('thomas.maclean@gmail.com')
+                .find({ serie: args.dbName, owned: true });
 
-            return x;
+            const comicsOwned = userData.map(x => x.comicid);
+            comicsInSerie.forEach(com => {
+                com._id = com._id.toString();
+                com.owned = comicsOwned.includes(com._id);
+            });
+
+            //console.log(comicsInSerie);
+
+            return comicsInSerie;
         },
-        allSeries: () => {
-            return mockSeries;
+        allSeries: async () => {
+            let series = await db.get('series').find({});
+            return series;
         }
     },
     Serie: {
         comics: async serie => {
-            console.log(serie);
+            let comicsInSerie = await db
+                .get(serie.dbName)
+                .find({ nr: { $ne: null } });
+            let userData = await db
+                .get(user)
+                .find({ serie: serie.dbName, owned: true });
 
-            return await db.get(serie.dbName).find({});
+            const comicsOwned = userData.map(x => x.comicid);
+            comicsInSerie.forEach(com => {
+                com._id = com._id.toString();
+                com.owned = comicsOwned.includes(com._id);
+            });
+            return comicsInSerie;
+        }
+    },
+    Mutation: {
+        toggleOwned: (root, args) => {
+            const { serie, comicid, owned } = args;
+            const query = { serie, comicid };
+            console.log('trigger');
+
+            db.get(user).update(
+                query,
+                { serie, comicid, owned },
+                { upsert: true }
+            );
+            return owned;
         }
     }
 };

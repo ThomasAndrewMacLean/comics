@@ -30,13 +30,23 @@ module.exports.postDefs = gql`
         title: String!
         ownerId: Int
     }
+    extend type Mutation {
+        addPost(name: String!): Post
+    }
 `;
 
 module.exports.postResolvers = {
     Query: {
         posts: (root, args, context, info) => {
             console.log(info);
-            return mockPosts.filter(m => m.ownerId == args.msg);
+            return mockPosts; //.filter(m => m.ownerId == args.msg);
+        }
+    },
+    Mutation: {
+        addPost: (root, args) => {
+            const newPost = { id: mockPosts.length + 1, title: args.name };
+            mockPosts.push(newPost);
+            return newPost;
         }
     }
 };
