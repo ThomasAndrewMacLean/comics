@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/ThomasAndrewMacLean/comics-frontend.svg?branch=master)](https://travis-ci.org/ThomasAndrewMacLean/comics-frontend)
+
 # comics
 
 database to keep track of comics
